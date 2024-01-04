@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Stopwatch</title>
+
+        <style>
+            #timer{
+                display: flex;
+                justify-content: center;
+                font-size: 4em;
+            }
+            #timer #millisecondsTensUnits{
+                padding-top:5.3%;
+                font-size: 1em;
+            }
+
+            #buttons{
+                display: flex;
+                justify-content: center;
+            }
+            .startBtn, .pauseBtn, .splitBtn, .resetBtn{
+                width: 100px;
+                height: 100px;
+                border-radius: 50%;
+                margin: 1em;
+                border: none;
+                font-weight: bold;
+                font-size: 1.2em;
+                background-color: white;
+            } 
+            .startBtn:hover{
+                color:white;
+                background-color: rgb(67, 161, 130);
+            }
+            .pauseBtn:hover{
+                color:white;
+                background-color: rgb(167, 190, 32);
+            }
+            .splitBtn:hover{
+                color:white;
+                background-color: rgb(209, 157, 60);
+            }
+            .resetBtn:hover{
+                color:white;
+                background-color: rgb(82, 124, 214);
+            }
+
+            #buttons button.stopActive, button.startActive{
+                cursor: not-allowed;
+                opacity: 50%;
+            }
+
+            .log{
+                display: flex;
+                justify-content: center; 
+                /* background-color: aqua; */
+            }
+
+            #logTable{
+                width: 40%;
+                /* border: 1px solid; */
+                /* border-width: 1em; */
+            }
+
+            #logTable #serialNumber{
+                /* background-color: blue; */
+                width:20%;
+            }
+
+            #logTable #time{
+                /* background-color:blueviolet; */
+                width:40%;
+            }
+
+            #logTable #buttonClicked{
+                /* background-color:chartreuse; */
+                width:40%;
+            }
+
+
+        </style>
+
+    </head>
+    <body>
+        <div id="timer">
+            <h1 id="hours">00</h1>
+            <h1 id="colon">:</h1>
+            <h1 id="minutes">00</h1>
+            <h1 id="colon">:</h1>
+            <h1 id="seconds">00</h1>
+            <h1 id="colon">.</h1>
+            <h1 id="millisecondsHundredth">0</h1>
+            <h1 id="millisecondsTensUnits">00</h1>
+        </div>
+        <div id="buttons">
+            <button class="startBtn">Start</button>
+            <button class="pauseBtn">Pause</button>
+            <button class="splitBtn">Split</button>
+            <button class="resetBtn">Reset</button>
+        </div>
+
+        <div class="log">
+            <table id="logTable">
+                <tr>
+                    <th id="serialNumber"></th>
+                    <th id="time"></th>
+                    <th id="buttonClicked"></th>
+                </tr>
+                <tr id="tableData">
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>   
+            </table>
+        </div>
+    </body>
+
+</html>
+
+
+<script>
+
+    let hour=minute=second=milliSecondHundredth=millisecondsTensUnits=0;
+    let startTimer;
+    let logArray = {"A":1,"G":1,"S":1,"B":1};
+    let noContents = 1;
+    let buttonPressed = "Split";
+
+    const startBtn=document.querySelector(".startBtn"), pauseBtn=document.querySelector(".pauseBtn"), splitBtn=document.querySelector(".splitBtn"), resetBtn=document.querySelector(".resetBtn");    
+    const tableOfLog = document.querySelector("#logTable");
+
+
+    startBtn.addEventListener("click", start);
+    resetBtn.addEventListener("click", reset);
+    pauseBtn.addEventListener("click", pause);
+    splitBtn.addEventListener("click", ()=>{
+        buttonPressed="Split";
+        split();
+    });
+
+    function split(){
+
+        let row  = tableOfLog.insertRow();
+        let cell = row.insertCell();
+            cell.innerHTML = "#"+noContents;
+            cell = row.insertCell();
+            cell.innerHTML = hour+":"+minute+":"+second+"."+milliSecondHundredth.toString()+millisecondsTensUnits.toString();
+            cell = row.insertCell();
+            cell.innerHTML = buttonPressed;
+        
+            noContents++;
+
+            // return;
+
+    }
+
+    function start(){
+        
+        buttonPressed="Start";
+        split();
+
+        startBtn.classList.add("startActive");
+        pauseBtn.classList.remove("stopActive");
+
+        var timeNow = Date.now();
+
+        startTimer = setInterval(()=>{
+            
+            // var elapsedTime = Date.now()-timeNow;
+
+            // millisecondsTensUnits=elapsedTime%1000;
+
+
+            millisecondsTensUnits+=3.5;
+
+            if(millisecondsTensUnits>=100){
+                milliSecondHundredth++;
+               millisecondsTensUnits=0;
+            }
+            if(milliSecondHundredth==10){
+                second++;
+                milliSecondHundredth=0; 
+            }
+            if(second==60){
+                minute++;
+                second=0;
+            }
+            if(minute==60){
+                hour++;
+                minute=0;
+            }
+
+            putValue();
+
+        },1);
+    
+    }
+
+    function pause(){
+        startBtn.classList.remove("startActive");
+        pauseBtn.classList.add("stopActive");
+        clearInterval(startTimer);
+
+        buttonPressed="Pause";
+        split();
+    
+    }
+
+    function reset(){
+        startBtn.classList.remove("startActive");
+        pauseBtn.classList.remove("stopActive");
+
+        clearInterval(startTimer);
+        buttonPressed="Reset";
+        split();
+        hour=minute=second=milliSecondHundredth=millisecondsTensUnits=0;
+        putValue();
+
+    }
+
+    function putValue(){
+        document.querySelector("#"+"millisecondsTensUnits").innerText = ( millisecondsTensUnits < 10 ? "0"+Math.floor(millisecondsTensUnits): Math.floor(millisecondsTensUnits));
+        // (millisecondsTensUnits>=10 && millisecondsTensUnits<100) ? "0"+millisecondsTensUnits
+        document.querySelector("#"+"millisecondsHundredth").innerText = milliSecondHundredth;
+        document.querySelector("#"+"seconds").innerText = ( second < 10 ? "0"+second: second);
+        document.querySelector("#"+"minutes").innerText = (minute < 10 ? "0"+minute: minute);
+        document.querySelector("#"+"hours").innerText = (hour < 10 ? "0"+hour: hour);
+    }
+
+</script>
